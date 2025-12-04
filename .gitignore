@@ -1,0 +1,69 @@
+# Archivos de sistema
+*.log
+*.pot
+*.pyc
+__pycache__/
+*.so
+*.pyd
+*.pyo
+*.db
+*.sqlite3
+
+# Archivos de entorno y dependencias
+.venv/
+venv/
+env/
+ENV/
+*.env
+.env.*
+.env
+
+# Archivos de configuración del IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos de migraciones compiladas
+**/migrations/**__pycache__/
+**/migrations/*.pyc
+**/migrations/*.pyo
+
+# Ignorar todas las carpetas de migraciones y su contenido
+**/migrations/*
+!**/migrations/__init__.py
+
+# Archivos estáticos y media generados
+/staticfiles/
+media/
+
+# Archivos de coverage y testing
+.coverage
+coverage/
+htmlcov/
+
+# Archivos de compilación
+*.egg-info/
+*.eggs/
+build/
+dist/
+
+# Archivos de Docker
+*.pid
+
+# Archivos de MyPy
+.mypy_cache/
+
+# Archivos de PyTest
+.pytest_cache/
+
+# Archivos de cache de Django
+*.mo
+
+# Archivos de OS
+.DS_Store
+Thumbs.db
+
+# Archivos de JetBrains
+*.iml
+out/

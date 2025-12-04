@@ -1,0 +1,1 @@
+# Este archivo permite importar los enums desde este paquete

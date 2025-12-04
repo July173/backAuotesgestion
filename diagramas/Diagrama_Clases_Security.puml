@@ -1,0 +1,157 @@
+@startuml Diagrama_Clases_Security_Module
+
+title Módulo SECURITY - Sistema de Autogestión SENA
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor<<Entity>> #E3F2FD
+  BackgroundColor<<Association>> #FFE0B2
+  BorderColor Black
+  ArrowColor Black
+}
+
+' ==================== SECURITY MODULE ====================
+
+class DocumentType <<Entity>> {
+  - id: Integer {PK}
+  - name: String(100)
+  - acronyms: String(20)
+  - active: Boolean
+  - delete_at: DateTime
+  __
+  + __str__(): String
+}
+
+class Person <<Entity>> {
+  - id: Integer {PK}
+  - type_identification_id: Integer {FK}
+  - number_identification: Integer {unique}
+  - first_name: String(100)
+  - second_name: String(100)
+  - first_last_name: String(100)
+  - second_last_name: String(100)
+  - phone_number: BigInteger
+  - image: ImageField
+  - active: Boolean
+  - delete_at: DateTime
+  __
+  + __str__(): String
+  + get_full_name(): String
+}
+
+class User <<Entity>> {
+  - id: Integer {PK}
+  - person_id: Integer {FK unique}
+  - role_id: Integer {FK}
+  - email: String(100) {unique}
+  - password: String {hashed}
+  - registered: Boolean
+  - is_active: Boolean
+  - is_staff: Boolean
+  - login_code: String(10)
+  - login_code_expiration: DateTime
+  - login_code_used: Boolean
+  - reset_code: String(10)
+  - reset_code_expiration: DateTime
+  - created_at: DateTime
+  - updated_at: DateTime
+  - deleted_at: DateTime
+  __
+  + soft_delete(): void
+  + restore(): void
+  + is_deleted(): Boolean
+  + __str__(): String
+}
+
+class Role <<Entity>> {
+  - id: Integer {PK}
+  - type_role: String(50)
+  - description: Text(255)
+  - active: Boolean
+  - delete_at: DateTime
+  __
+  + __str__(): String
+}
+
+class Permission <<Entity>> {
+  - id: Integer {PK}
+  - type_permission: String(50)
+  - description: Text(255)
+  - active: Boolean
+  - delete_at: DateTime
+  __
+  + __str__(): String
+}
+
+class Module <<Entity>> {
+  - id: Integer {PK}
+  - name: String(100)
+  - description: Text(255)
+  - active: Boolean
+  - delete_at: DateTime
+  __
+  + __str__(): String
+}
+
+class Form <<Entity>> {
+  - id: Integer {PK}
+  - name: String(100)
+  - description: Text(255)
+  - path: String(255)
+  - active: Boolean
+  - delete_at: DateTime
+  __
+  + __str__(): String
+}
+
+class FormModule <<Association>> {
+  - id: Integer {PK}
+  - form_id: Integer {FK}
+  - module_id: Integer {FK}
+  - active: Boolean
+  - deleted_at: DateTime
+}
+
+class RoleFormPermission <<Association>> {
+  - id: Integer {PK}
+  - role_id: Integer {FK}
+  - form_id: Integer {FK}
+  - permission_id: Integer {FK}
+  - active: Boolean
+  - delete_at: DateTime
+}
+
+' Relaciones
+DocumentType "1" -- "0..*" Person : < tipo de documento
+Person "1" -- "1" User : < persona
+Role "1" -- "0..*" User : < rol
+
+Form "1" -- "0..*" FormModule : forms >
+Module "1" -- "0..*" FormModule : modules >
+
+Role "1" -- "0..*" RoleFormPermission : roles >
+Form "1" -- "0..*" RoleFormPermission : forms >
+Permission "1" -- "0..*" RoleFormPermission : permissions >
+
+note top of User
+  Usuario del sistema con autenticación
+  de dos factores (2FA) y recuperación
+  de contraseña por código
+end note
+
+note right of RoleFormPermission
+  Gestión de permisos granular:
+  - Rol: Aprendiz, Instructor, Admin, etc.
+  - Formulario: Pantallas del sistema
+  - Permiso: Ver, Crear, Editar, Eliminar
+end note
+
+legend right
+  |= Color |= Tipo |
+  | #E3F2FD | Entidad |
+  | #FFE0B2 | Tabla Asociación |
+endlegend
+
+@enduml
+

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Código de Verificación - SENA</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
+        .container { max-width: 500px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 32px; }
+        h2 { color: #1a7f37; }
+        .code { font-size: 2em; font-weight: bold; color: #1a7f37; letter-spacing: 4px; margin: 24px 0; }
+        .info { margin-bottom: 16px; }
+        .footer { font-size: 0.9em; color: #888; margin-top: 32px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Verificación de inicio de sesión</h2>
+        <p class="info">Hola <strong>{{ nombre }}</strong>,</p>
+        <p>Tu código de verificación para acceder al sistema SENA es:</p>
+        <div class="code">{{ codigo }}</div>
+        <p>Este código expirará el <strong>{{ fecha_expiracion }}</strong>.</p>
+        <p>Si no solicitaste este código, puedes ignorar este mensaje.</p>
+        <div class="footer">SENA - Sistema de Autogestión</div>
+    </div>
+</body>
+</html>

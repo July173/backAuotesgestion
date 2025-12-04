@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Registro Exitoso - Cuenta Pendiente de Activación</title>
+</head>
+<body style="background:#fff;max-width:400px;margin:auto;padding:24px;font-family:sans-serif;">
+  <div style="background:#16A34A;color:#fff;border-radius:8px 8px 0 0;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;">
+    <img src="./images/logo.png" alt="SENA" style="height:40px;vertical-align:middle;margin-right:12px;" />
+    <span style="font-weight:bold;font-size:18px;">Sena-Sistema de Autogestión</span>
+  </div>
+  <div style="text-align:center;margin-top:24px;">
+    <h2 style="font-weight:bold;font-size:22px;margin-bottom:8px;">Registro Exitoso - Cuenta Pendiente de Activación</h2>
+    <span style="font-size:48px;color:#16A34A;">&#10003;</span>
+    <p style="margin-top:16px;font-size:18px;">¡Bienvenido al Sistema de Seguimiento, <b>{{ nombre }}</b>!</p>
+  </div>
+  <div style="margin-top:16px;text-align:center;font-size:16px;margin-bottom:8px;">
+    Su registro ha sido completado exitosamente.<br />Los detalles de su cuenta son:
+  </div>
+  <div style="background:#f3f3f3;border-radius:8px;padding:16px;margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+      <span style="font-weight:500;">Nombre :</span>
+      <span>{{ nombre }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+      <span style="font-weight:500;">Email:</span>
+      <span>{{ email }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;">
+      <span style="font-weight:500;">Fecha de registro:</span>
+      <span>{{ fecha_registro }}</span>
+    </div>
+  </div>
+  <div style="background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;padding:16px;margin-bottom:16px;">
+    <span style="font-weight:bold;color:#d48806;">Próximos pasos:</span>
+    <ul style="margin-left:16px;margin-top:8px;color:#d48806;font-size:14px;">
+      <li>Su cuenta está pendiente de activación por parte del administrador</li>
+      <li>Recibirá un correo con sus credenciales una vez la cuenta sea habilitada</li>
+      <li>Manténgase atento a su correo electrónico</li>
+    </ul>
+  </div>
+  <div style="background:#f3f3f3;color:#888;text-align:center;border-radius:0 0 8px 8px;padding:16px;font-size:13px;">
+    Este es un correo automático del Sistema de Autogestión SENA<br />
+    Por favor no responda a este correo
+  </div>
+</body>
+</html>

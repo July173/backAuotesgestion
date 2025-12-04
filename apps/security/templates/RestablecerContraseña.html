@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Recuperación de Contraseña</title>
+	<!-- Bootstrap Icons CDN -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+	<style>
+		body { font-family: Arial, sans-serif; background: #f8f9fa; margin: 0; padding: 0; }
+		.container { max-width: 480px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 24px; }
+		.header { background: #28a745; color: #fff; padding: 16px 0; border-radius: 8px 8px 0 0; text-align: left; }
+		.logo { height: 40px; vertical-align: middle; margin-right: 12px; }
+		.title { font-size: 1.3rem; font-weight: bold; }
+		.main-title { font-size: 1.2rem; font-weight: bold; margin: 24px 0 8px; text-align: center; }
+		.icon { font-size: 48px; color: #1976d2; text-align: center; margin-bottom: 8px; }
+		.code-box { background: #e3eafc; border-radius: 8px; padding: 16px; text-align: center; margin: 16px 0; }
+		.code-label { font-size: 1rem; color: #1976d2; font-weight: bold; }
+		.code { font-size: 1.2rem; font-weight: bold; background: #fff; border-radius: 6px; padding: 6px 18px; border: 1px solid #1976d2; display: inline-block; margin-top: 8px; }
+		.important { background: #fffbe6; border-radius: 8px; padding: 12px; margin: 16px 0; border: 1px solid #ffe58f; color: #856404; font-size: 0.95rem; }
+		.steps { background: #f4f6f8; border-radius: 8px; padding: 12px; margin: 16px 0; color: #333; font-size: 0.98rem; }
+		.footer { color: #6c757d; font-size: 0.95rem; text-align: center; margin-top: 24px; }
+		.bi { vertical-align: middle; }
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<img src="./images/logo.png" alt="SENA" class="logo" />
+			<span class="title">Sena-Sistema de Autogestión</span>
+		</div>
+		<div class="main-title">Recuperación de Contraseña</div>
+	<div class="icon"><i class="bi bi-key-fill"></i></div>
+		<h2 style="text-align:center; font-size:1.1rem; font-weight:500; margin-bottom:8px;">Código de Recuperación de Contraseña</h2>
+		<p style="text-align:center; margin-bottom:16px;">Estimado/a {{ nombre }}, hemos recibido una solicitud para restablecer su contraseña.</p>
+		<div class="code-box">
+			<div class="code-label"><i class="bi bi-shield-lock-fill"></i> Código de Recuperación</div>
+			<div class="code">{{ codigo }}</div>
+		</div>
+		<div class="important">
+			<b><i class="bi bi-clock-history"></i> Importante:</b><br>
+			• Este código expira el: <b>{{ fecha_expiracion }}</b><br>
+			• Solo puede utilizarse una vez<br>
+			• Si no solicitó este cambio, ignore este correo
+		</div>
+		<div class="steps">
+			<b>Pasos a seguir:</b><br>
+			1. Ingrese el código de recuperación<br>
+			2. Establezca su nueva contraseña<br>
+			3. Inicie sesión con su nueva contraseña
+		</div>
+		<div class="footer">
+			Este es un correo automático del Sistema de Autogestión SENA<br>
+			Por favor no responda a este correo
+		</div>
+	</div>
+</body>
+</html>

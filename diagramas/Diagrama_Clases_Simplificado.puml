@@ -1,0 +1,126 @@
+@startuml Diagrama_Clases_Simplificado
+
+title Sistema de Autogestión SENA - Vista Simplificada
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' Solo relaciones principales y atributos clave
+
+package "SECURITY" #E3F2FD {
+  class Person {
+    number_identification
+    first_name
+    first_last_name
+  }
+  
+  class User {
+    email
+    password
+    is_active
+  }
+  
+  class Role {
+    type_role
+  }
+}
+
+package "GENERAL" #E8F5E9 {
+  class Regional {
+    name
+    code_regional
+  }
+  
+  class Center {
+    name
+    code_center
+  }
+  
+  class Sede {
+    name
+    code_sede
+  }
+  
+  class Program {
+    name
+    code_program
+  }
+  
+  class Ficha {
+    file_number
+    type_modality
+  }
+  
+  class Apprentice {
+  }
+  
+  class Instructor {
+    contract_start_date
+    contract_end_date
+    assigned_learners
+    is_followup_instructor
+  }
+  
+  class KnowledgeArea {
+    name
+  }
+}
+
+package "ASSIGN" #FFF9C4 {
+  class Enterprise {
+    name_enterprise
+    nit_enterprise
+  }
+  
+  class RequestAsignation {
+    request_date
+    request_state
+    date_start
+    date_end
+  }
+  
+  class AsignationInstructor {
+    date_asignation
+  }
+  
+  class VisitFollowing {
+    visit_number
+    scheduled_date
+    state_visit
+  }
+}
+
+' Relaciones Principales
+User "1" -- "1" Person
+User "*" -- "1" Role
+
+Regional "1" -- "*" Center
+Center "1" -- "*" Sede
+
+Program "1" -- "*" Ficha
+Ficha "1" -- "*" Apprentice
+Apprentice "1" -- "1" Person
+
+Instructor "1" -- "1" Person
+Instructor "*" -- "1" KnowledgeArea
+
+Apprentice "1" -- "*" RequestAsignation
+Enterprise "1" -- "*" RequestAsignation
+
+RequestAsignation "1" -- "1" AsignationInstructor
+AsignationInstructor "*" -- "1" Instructor
+AsignationInstructor "1" -- "*" VisitFollowing
+
+note as N1
+  **FLUJO PRINCIPAL:**
+  
+  1. Person se registra como User
+  2. Person puede ser Apprentice o Instructor
+  3. Apprentice pertenece a Ficha
+  4. Apprentice solicita etapa productiva (RequestAsignation)
+  5. Se asigna Instructor de seguimiento (AsignationInstructor)
+  6. Instructor realiza visitas (VisitFollowing)
+end note
+
+@enduml
+

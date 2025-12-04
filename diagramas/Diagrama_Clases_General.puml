@@ -1,0 +1,236 @@
+@startuml Diagrama_Clases_General_Module
+
+title Módulo GENERAL - Sistema de Autogestión SENA
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor<<Entity>> #E8F5E9
+  BackgroundColor<<Catalog>> #FFF9C4
+  BackgroundColor<<Association>> #FFE0B2
+}
+
+' ==================== ESTRUCTURA ORGANIZACIONAL ====================
+
+package "Estructura Organizacional" {
+  class Regional <<Entity>> {
+    - id: Integer {PK}
+    - name: String(100)
+    - code_regional: BigInteger {unique}
+    - description: Text(255)
+    - address: String(255)
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  class Center <<Entity>> {
+    - id: Integer {PK}
+    - regional_id: Integer {FK}
+    - name: String(100)
+    - code_center: BigInteger {unique}
+    - address: String(255)
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  class Sede <<Entity>> {
+    - id: Integer {PK}
+    - center_id: Integer {FK}
+    - name: String(100)
+    - code_sede: BigInteger {unique}
+    - address: String(255)
+    - phone_sede: BigInteger
+    - email_contact: Email(100)
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  class PersonSede <<Association>> {
+    - id: Integer {PK}
+    - sede_id: Integer {FK}
+    - person_id: Integer {FK}
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  Regional "1" -- "*" Center : contiene >
+  Center "1" -- "*" Sede : contiene >
+  Sede "1" -- "*" PersonSede : asignado a >
+}
+
+' ==================== ACADÉMICO ====================
+
+package "Académico" {
+  class Program <<Entity>> {
+    - id: Integer {PK}
+    - name: String(100)
+    - code_program: BigInteger
+    - description: Text(255)
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  class Ficha <<Entity>> {
+    - id: Integer {PK}
+    - program_id: Integer {FK}
+    - file_number: BigInteger {unique}
+    - type_modality: String(50)
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  class Apprentice <<Entity>> {
+    - id: Integer {PK}
+    - person_id: Integer {FK unique}
+    - ficha_id: Integer {FK}
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  class KnowledgeArea <<Catalog>> {
+    - id: Integer {PK}
+    - name: String(100)
+    - description: Text(200)
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  class TypeContract <<Catalog>> {
+    - id: Integer {PK}
+    - name: String(100)
+    - description: Text(200)
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  class Instructor <<Entity>> {
+    - id: Integer {PK}
+    - person_id: Integer {FK unique}
+    - contract_type_id: Integer {FK}
+    - knowledge_area_id: Integer {FK}
+    - contract_start_date: Date
+    - contract_end_date: Date
+    - assigned_learners: Integer
+    - max_assigned_learners: Integer
+    - is_followup_instructor: Boolean
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  Program "1" -- "*" Ficha : tiene >
+  Ficha "1" -- "*" Apprentice : agrupa >
+  TypeContract "1" -- "*" Instructor : tipo >
+  KnowledgeArea "1" -- "*" Instructor : especialidad >
+}
+
+' ==================== NOTIFICACIONES ====================
+
+package "Notificaciones" {
+  class Notification <<Entity>> {
+    - id: Integer {PK}
+    - id_user_id: Integer {FK}
+    - title: String(255)
+    - message: Text
+    - type: String(50)
+    - link: String(100)
+    - is_read: Boolean
+    - active: Boolean
+    - created_at: DateTime
+  }
+}
+
+' ==================== DOCUMENTOS LEGALES ====================
+
+package "Documentos Legales" {
+  class LegalDocument <<Entity>> {
+    - id: Integer {PK}
+    - type: String(100)
+    - title: String(255)
+    - effective_date: Date
+    - last_update: Date
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  class LegalSection <<Entity>> {
+    - id: Integer {PK}
+    - document_id: Integer {FK}
+    - parent_id: Integer {FK}
+    - order: Integer
+    - code: String(20)
+    - title: String(200)
+    - content: Text(100)
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  LegalDocument "1" -- "*" LegalSection : secciones >
+  LegalSection "0..1" -- "*" LegalSection : padre >
+}
+
+' ==================== SOPORTE ====================
+
+package "Soporte y Configuración" {
+  class Colors <<Catalog>> {
+    - id: Integer {PK}
+    - name: String(100)
+    - hexagonal_value: String(7)
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  class SupportContact <<Catalog>> {
+    - id: Integer {PK}
+    - type: String(50)
+    - label: String(100)
+    - value: String(255)
+    - extra_info: Text(100)
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  class SupportSchedule <<Catalog>> {
+    - id: Integer {PK}
+    - day_range: String(100)
+    - hours: String(100)
+    - is_closed: Boolean
+    - notes: Text(100)
+    - active: Boolean
+    - delete_at: DateTime
+  }
+  
+  class TypeOfQueries <<Catalog>> {
+    - id: Integer {PK}
+    - name: String(100)
+    - description: Text(255)
+    - active: Boolean
+    - delete_at: DateTime
+  }
+}
+
+note top of Regional
+  Jerarquía organizacional:
+  Regional → Center → Sede
+  
+  Ejemplo: Regional Antioquia →
+  Centro de Servicios de Salud →
+  Sede Medellín
+end note
+
+note top of Program
+  Flujo académico:
+  Program → Ficha → Apprentice
+  
+  Un programa tiene múltiples
+  fichas (grupos/cohortes)
+end note
+
+note right of LegalSection
+  Estructura jerárquica de
+  documentos legales con
+  auto-referencia para crear
+  árbol de secciones
+end note
+
+@enduml
+

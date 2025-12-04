@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cuenta Activada - Credenciales de Acceso</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background: #fff;
+            max-width: 500px;
+            margin: 30px auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .header {
+            background: #2eb04e;
+            color: #fff;
+            padding: 18px 0 10px 0;
+            text-align: center;
+        }
+        .header img {
+            width: 60px;
+            margin-bottom: 5px;
+        }
+        .title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 18px 0 0 0;
+        }
+        .check {
+            font-size: 48px;
+            color: #2eb04e;
+            margin: 20px 0 0 0;
+        }
+        .content {
+            padding: 20px 30px 10px 30px;
+            text-align: center;
+        }
+        .access-box {
+            background: #e6f7ea;
+            border-radius: 8px;
+            padding: 18px 15px 10px 15px;
+            margin: 20px 0 15px 0;
+            border: 1px solid #b2e2c5;
+            text-align: left;
+        }
+        .access-title {
+            color: #2eb04e;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .access-title svg {
+            margin-right: 7px;
+        }
+        .access-row {
+            margin-bottom: 8px;
+        }
+        .access-label {
+            font-weight: bold;
+        }
+        .access-value {
+            background: #d2f3d9;
+            border-radius: 5px;
+            padding: 2px 8px;
+            margin-left: 5px;
+            font-family: monospace;
+        }
+        .instructions {
+            background: #e6f0fa;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin: 18px 0 0 0;
+            color: #1a237e;
+            font-size: 0.98em;
+            text-align: left;
+        }
+        .footer {
+            background: #f4f4f4;
+            color: #888;
+            font-size: 0.95em;
+            text-align: center;
+            padding: 15px 10px 10px 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Logo_SENA.svg" alt="SENA Logo" height="50">
+            <div class="title">Sena-Sistema de Autogestión</div>
+        </div>
+        <div class="content">
+            <div class="check">&#10003;</div>
+            <h2>¡Su cuenta ha sido activada!</h2>
+            <p>Estimado/a {{ nombre }}, su cuenta ha sido habilitada por el administrador. Ya puede acceder al sistema con las siguientes credenciales:</p>
+            <div class="access-box">
+                <div class="access-title">
+                    <svg width="20" height="20" fill="#2eb04e" viewBox="0 0 24 24"><path d="M17 8V7a5 5 0 0 0-10 0v1a3 3 0 0 0-3 3v7a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-7a3 3 0 0 0-3-3zm-8-1a3 3 0 0 1 6 0v1H9zm10 11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1z"/></svg>
+                    Credenciales de Acceso
+                </div>
+                <div class="access-row"><span class="access-label">Usuario:</span> <span class="access-value">{{ email_usuario }}</span></div>
+                <div class="access-row"><span class="access-label">Contraseña temporal:</span> <span class="access-value">{{ password_temporal }}</span></div>
+            </div>
+            <div class="instructions">
+                <strong>Instrucciones importantes:</strong>
+                <ul style="margin: 8px 0 0 18px; padding: 0;">
+                    <li>Esta es una contraseña temporal que debe cambiar en su primer ingreso</li>
+                    <li>Mantenga sus credenciales seguras</li>
+                    <li>Acceda al sistema mediante el siguiente enlace</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer">
+            Este es un correo automático del Sistema de Autogestión SENA<br>
+            Por favor no responda a este correo
+        </div>
+    </div>
+</body>
+</html>

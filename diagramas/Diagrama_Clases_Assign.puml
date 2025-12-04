@@ -1,0 +1,203 @@
+@startuml Diagrama_Clases_Assign_Module
+
+title Módulo ASSIGN - Sistema de Autogestión SENA
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor<<Entity>> #FFF9C4
+  BackgroundColor<<Enum>> #FFCCBC
+}
+
+' ==================== EMPRESAS ====================
+
+package "Empresas" {
+  class Enterprise <<Entity>> {
+    - id: Integer {PK}
+    - name_enterprise: String(100)
+    - nit_enterprise: String(20)
+    - locate: String(255)
+    - email_enterprise: Email(100)
+    - active: Boolean
+    - delete_at: DateTime
+    __
+    + __str__(): String
+  }
+  
+  class Boss <<Entity>> {
+    - id: Integer {PK}
+    - enterprise_id: Integer {FK}
+    - name_boss: String(100)
+    - phone_number: BigInteger
+    - email_boss: Email(100)
+    - position: String(100)
+    - active: Boolean
+    - delete_at: DateTime
+    __
+    + __str__(): String
+  }
+  
+  class HumanTalent <<Entity>> {
+    - id: Integer {PK}
+    - enterprise_id: Integer {FK}
+    - name: String(100)
+    - email: Email(100)
+    - phone_number: BigInteger
+    - active: Boolean
+    - delete_at: DateTime
+    __
+    + __str__(): String
+  }
+  
+  Enterprise "1" -- "*" Boss : jefes >
+  Enterprise "1" -- "*" HumanTalent : recursos humanos >
+}
+
+' ==================== MODALIDADES ====================
+
+package "Modalidades" {
+  class ModalityProductiveStage <<Entity>> {
+    - id: Integer {PK}
+    - name_modality: String(100)
+    - description: Text(255)
+    - active: Boolean
+    - delete_at: DateTime
+    __
+    + __str__(): String
+  }
+}
+
+' ==================== SOLICITUDES ====================
+
+package "Solicitudes y Asignaciones" {
+  
+  enum RequestState <<Enum>> {
+    SIN_ASIGNAR
+    ASIGNADO
+    EN_PROCESO
+    COMPLETADO
+    RECHAZADO
+  }
+  
+  class RequestAsignation <<Entity>> {
+    - id: Integer {PK}
+    - apprentice_id: Integer {FK}
+    - enterprise_id: Integer {FK}
+    - modality_productive_stage_id: Integer {FK}
+    - human_talent_id: Integer {FK}
+    - boss_id: Integer {FK}
+    - request_date: Date
+    - date_start_production_stage: Date
+    - date_end_production_stage: Date
+    - pdf_request: FileField
+    - request_state: String(50)
+    - rejection_message: Text(500)
+    - active: Boolean
+    - delete_at: DateTime
+    __
+    + __str__(): String
+  }
+  
+  class AsignationInstructor <<Entity>> {
+    - id: Integer {PK}
+    - instructor_id: Integer {FK}
+    - request_asignation_id: Integer {FK unique}
+    - date_asignation: Date
+    - active: Boolean
+    - delete_at: DateTime
+    __
+    + __str__(): String
+  }
+  
+  class AsignationInstructorHistory <<Entity>> {
+    - id: Integer {PK}
+    - asignation_instructor_id: Integer {FK}
+    - old_instructor_id: Integer
+    - message: Text(300)
+    - date: DateTime
+    __
+    + __str__(): String
+  }
+  
+  class Message <<Entity>> {
+    - id: Integer {PK}
+    - request_asignation_id: Integer {FK}
+    - content: Text(255)
+    - type_message: String(255)
+    - whose_message: String(50)
+    __
+    + __str__(): String
+  }
+  
+  class VisitFollowing <<Entity>> {
+    - id: Integer {PK}
+    - asignation_instructor_id: Integer {FK}
+    - visit_number: Integer
+    - observations: Text(500)
+    - state_visit: String(50)
+    - scheduled_date: Date
+    - date_visit_made: Date
+    - name_visit: String(100)
+    - observation_state_visit: Text(500)
+    - pdf_report: FileField
+    __
+    + __str__(): String
+  }
+  
+  RequestAsignation -- RequestState : estado
+  Enterprise "1" -- "*" RequestAsignation : solicitudes >
+  ModalityProductiveStage "1" -- "*" RequestAsignation : modalidad >
+  HumanTalent "0..1" -- "*" RequestAsignation : contacto RH >
+  Boss "0..1" -- "*" RequestAsignation : jefe inmediato >
+  
+  RequestAsignation "1" -- "0..1" AsignationInstructor : asignación >
+  AsignationInstructor "1" -- "*" AsignationInstructorHistory : historial >
+  RequestAsignation "1" -- "*" Message : mensajes >
+  AsignationInstructor "1" -- "*" VisitFollowing : visitas >
+}
+
+note top of RequestAsignation
+  **Flujo de Solicitud:**
+  1. Aprendiz solicita etapa productiva
+  2. Selecciona empresa y modalidad
+  3. Estado: SIN_ASIGNAR
+  4. Se asigna instructor de seguimiento
+  5. Estado: ASIGNADO
+  6. Instructor realiza visitas
+  7. Estado: COMPLETADO
+end note
+
+note bottom of AsignationInstructorHistory
+  Mantiene historial de cambios
+  cuando un instructor es 
+  reasignado a otro aprendiz.
+  
+  Permite auditoría y trazabilidad.
+end note
+
+note right of VisitFollowing
+  **Visitas de Seguimiento:**
+  - Mínimo 3 visitas por etapa
+  - Programadas con fecha
+  - Incluyen observaciones
+  - Generan reportes PDF
+end note
+
+note left of Message
+  Sistema de mensajería
+  entre aprendiz, instructor,
+  empresa y administrador
+  sobre la solicitud
+end note
+
+legend right
+  |= Tipo |= Descripción |
+  | Entity | Entidad del dominio |
+  | Enum | Enumeración |
+  | {PK} | Clave primaria |
+  | {FK} | Clave foránea |
+  | {unique} | Restricción única |
+endlegend
+
+@enduml
+
