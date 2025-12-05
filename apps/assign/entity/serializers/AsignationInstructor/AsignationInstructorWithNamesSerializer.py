@@ -13,5 +13,6 @@ class PersonBasicSerializer(serializers.Serializer):
 
 class AsignationInstructorWithNamesSerializer(serializers.Serializer):
     asignation_id = serializers.IntegerField()
+    state_asignation = serializers.CharField(allow_null=True)
     apprentice = PersonBasicSerializer()
     instructor = PersonBasicSerializer()
