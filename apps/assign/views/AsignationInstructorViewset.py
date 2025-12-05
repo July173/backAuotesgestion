@@ -16,7 +16,7 @@ from apps.assign.entity.serializers.AsignationInstructor.AsignationInstructorFul
 
 
 class AsignationInstructorViewset(BaseViewSet):
-
+    
     service_class = AsignationInstructorService
     serializer_class = AsignationInstructorSerializer
 
@@ -195,3 +195,26 @@ class AsignationInstructorViewset(BaseViewSet):
             return Response({'success': False, 'message': 'No se encontró la asignación activa.'}, status=status.HTTP_404_NOT_FOUND)
         serializer = AsignationInstructorFullDataSerializer(data)
         return Response({'success': True, 'data': serializer.data}, status=status.HTTP_200_OK)
+    
+    #-- Get visits by asignation id --
+    @swagger_auto_schema(
+        method='get',
+        operation_description="Obtiene las visitas asociadas a una asignación por su id.",
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_QUERY, description="ID de la asignación", type=openapi.TYPE_INTEGER, required=True)
+        ],
+        responses={200: openapi.Response("OK")},
+        tags=["AsignationInstructor"]
+    )
+    @action(detail=False, methods=['get'], url_path='visits-by-asignation')
+    def visits_by_asignation(self, request):
+        asignation_id = request.query_params.get('id')
+        if not asignation_id:
+            return Response({'detail': 'El parámetro id es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+        service = self.service_class()
+        visits = service.get_visits_by_asignation_id(asignation_id)
+        if visits is None:
+            return Response({'success': False, 'message': 'No se encontró la asignación activa.'}, status=status.HTTP_404_NOT_FOUND)
+        from apps.assign.entity.serializers.VisitFollowingSerializer import VisitFollowingSerializer
+        serializer = VisitFollowingSerializer(visits, many=True)
+        return Response({'success': True, 'visits': serializer.data}, status=status.HTTP_200_OK)
