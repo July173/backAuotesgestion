@@ -393,6 +393,13 @@ class RequestAsignationService(BaseService):
                                 VisitFollowing.objects.bulk_create(visitas)
                                 logger.info(f"Se crearon {len(visitas)} visitas para la asignación {asignation.id}")
 
+                # Notificar a los coordinadores si el estado cambió a PRE-APROBADO
+                try:
+                    if request_state == RequestState.PRE_APROBADO:
+                            NotificationService().notify_pre_approved(req)
+                except Exception as e:
+                    logger.exception(f"Error al notificar coordinadores PRE_APROBADO: {e}")
+
             return {
                 'success': True,
                 'message': 'Solicitud actualizada correctamente',
