@@ -7,6 +7,7 @@ from drf_yasg import openapi
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.assign.services.VisitFollowingService import VisitFollowingService
 from apps.assign.entity.serializers.VisitFollowingSerializer import VisitFollowingSerializer
+from apps.assign.entity.serializers.VisitFollowingUpdateSerializer import VisitFollowingUpdateSerializer
 
 
 from apps.assign.entity.models import VisitFollowing
@@ -51,6 +52,7 @@ class VisitFollowingViewset(BaseViewSet):
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 
+    
     @swagger_auto_schema(
         operation_description="Elimina físicamente una visita de la base de datos.",
         tags=["VisitFollowing"]
@@ -79,3 +81,28 @@ class VisitFollowingViewset(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
+
+    #---------------------- Custom Patch ---------------------#
+    @swagger_auto_schema(
+        method='patch',
+        operation_description="Actualiza campos de una visita excepto `pdf_report`, `scheduled_date`, `visit_number` y `name_visit`.",
+        tags=["VisitFollowing"],
+        request_body=VisitFollowingUpdateSerializer,
+        responses={200: openapi.Response("OK", VisitFollowingUpdateSerializer)},
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_PATH, description="ID de la visita", type=openapi.TYPE_INTEGER, required=True)
+        ]
+    )
+    @action(detail=True, methods=['patch'], url_path='patch-excluding')
+    def patch_excluding(self, request, pk=None):
+        # Campos que NO se deben modificar mediante este endpoint
+        excluded = ['pdf_report', 'scheduled_date', 'visit_number', 'name_visit']
+        service = self.service_class()
+        try:
+            visit = service.partial_update_excluding(pk, request.data or {}, exclude_fields=excluded)
+        except Exception as e:
+            return Response({'success': False, 'message': f'Error al actualizar la visita: {e}'}, status=status.HTTP_400_BAD_REQUEST)
+        if visit is None:
+            return Response({'success': False, 'message': 'Visita no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.serializer_class(visit)
+        return Response({'success': True, 'visit': serializer.data}, status=status.HTTP_200_OK)
