@@ -175,3 +175,11 @@ class AsignationInstructorService(BaseService):
             'apprentice': apprentice_person,
             'instructor': instructor_person
         }
+
+    def get_visits_by_asignation_id(self, asignation_id):
+        try:
+            asignation = AsignationInstructor.objects.get(id=asignation_id, active=True)
+        except AsignationInstructor.DoesNotExist:
+            return None
+        visits = VisitFollowing.objects.filter(asignation_instructor=asignation).order_by('visit_number')
+        return visits
