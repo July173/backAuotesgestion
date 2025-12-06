@@ -177,9 +177,23 @@ class AsignationInstructorService(BaseService):
         }
 
     def get_visits_by_asignation_id(self, asignation_id):
+        """
+        Obtiene las visitas de una asignación junto con el estado de la asignación.
+        
+        Args:
+            asignation_id: ID de la asignación
+            
+        Returns:
+            dict: Diccionario con 'visits' y 'state_asignation', o None si no existe
+        """
         try:
             asignation = AsignationInstructor.objects.get(id=asignation_id, active=True)
         except AsignationInstructor.DoesNotExist:
             return None
+        
         visits = VisitFollowing.objects.filter(asignation_instructor=asignation).order_by('visit_number')
-        return visits
+        
+        return {
+            'visits': visits,
+            'state_asignation': asignation.state_asignation
+        }
