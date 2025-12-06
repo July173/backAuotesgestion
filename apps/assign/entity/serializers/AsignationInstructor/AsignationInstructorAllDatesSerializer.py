@@ -19,6 +19,7 @@ class AsignationInstructorSerializer(serializers.ModelSerializer):
             'id',
             'instructor',
             'request_asignation',
+            'state_asignation',
             'content',
             'type_message',
             'whose_message',

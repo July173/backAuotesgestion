@@ -171,6 +171,40 @@ class NotificationService:
                 'link': '',
             })
 
+    #--- Notify Pre-Approved Request ---#
+    def notify_pre_approved(self, request_asignation):
+        """
+        Notifica a todos los usuarios con rol 'Coordinador' cuando una solicitud pasa a PRE-APROBADO.
+        Se espera un objeto `RequestAsignation` con relación a `apprentice` y `id`.
+        """
+        try:
+            coordinador_role = Role.objects.filter(type_role__iexact="Coordinador").first()
+            if not coordinador_role:
+                logger.debug("No hay role 'Coordinador' definido en la base de datos")
+                return
+
+            coordinadores = User.objects.filter(role=coordinador_role).distinct()
+            logger.debug(f"Enviando notificación PRE-APROBADO a {coordinadores.count()} coordinadores para solicitud id={getattr(request_asignation, 'id', None)}")
+            for coordinador in coordinadores:
+                try:
+                    apprentice = getattr(request_asignation, 'apprentice', None)
+                    apprentice_name = ''
+                    if apprentice and getattr(apprentice, 'person', None):
+                        p = apprentice.person
+                        apprentice_name = f"{getattr(p, 'first_name', '')} {getattr(p, 'first_last_name', '')}".strip()
+
+                    self.create_notification({
+                        'id_user': coordinador,
+                        'title': 'Solicitud pre-aprobada',
+                        'message': f'La solicitud #{getattr(request_asignation, "id", "")} del aprendiz {apprentice_name} fue pre-aprobada.',
+                        'type': 'pre_aprobado',
+                        'link': f'/request/{getattr(request_asignation, "id", "")} '
+                    })
+                except Exception:
+                    logger.exception(f"Error creando notificación PRE-APROBADO para coordinador id={getattr(coordinador, 'id', None)}")
+        except Exception as e:
+            logger.exception(f"Error en notify_pre_approved: {e}")
+
 
     #----- Get Methods -----#
     #--- Get Notifications ---#

@@ -12,5 +12,6 @@ class PersonBasicSerializer(serializers.ModelSerializer):
 
 class AsignationInstructorFullDataSerializer(serializers.Serializer):
     asignation = serializers.PrimaryKeyRelatedField(read_only=True)
+    state_asignation = serializers.CharField(source='asignation.state_asignation', read_only=True)
     apprentice = PersonBasicSerializer(read_only=True)
     instructor = PersonBasicSerializer(read_only=True)
