@@ -346,11 +346,11 @@ INSERT INTO `role_form_permission` (`id`, `role_id`, `form_id`, `permission_id`,
 
 
 INSERT INTO `person` (`id`, `first_name`, `second_name`, `first_last_name`, `second_last_name`, `phone_number`, `number_identification`, `image`, `active`, `delete_at`, `type_identification_id`) VALUES
-	(1, 'July', '', 'Ramos', '', 3125647896, 1032679504, '', 1, NULL, 1),
+	(1, 'Reyving', '', 'Ramirez', '', 3125647896, 1032679504, '', 1, NULL, 1),
   (2, 'Daniela', '', 'Ramos', '', 3125647896, 1032679503, '', 1, NULL, 1),
-  (3, 'Ramos', '', 'Sena', '', 3125647897, 1098765431, '', 1, NULL, 1),
-  (4, 'Paola', '', 'Sena', '', 3125647897, 1098765432, '', 1, NULL, 1),
-  (5, 'Mario', '', 'Sena', '', 3125647897, 1098765400, '', 1, NULL, 1);
+  (3, 'Brayan', '', 'Cortes', '', 3125647897, 1098765431, '', 1, NULL, 1),
+  (4, 'Paola', '', 'Lopez', '', 3125647897, 1098765432, '', 1, NULL, 1),
+  (5, 'Mario', '', 'Gomez', '', 3125647897, 1098765400, '', 1, NULL, 1);
 
 
 INSERT INTO `apprentice` (`id`, `active`, `delete_at`, `ficha_id`, `person_id`) VALUES
@@ -374,9 +374,9 @@ INSERT INTO `person_sede` (`id`, `active`, `delete_at`, `person_id`, `sede_id`) 
 
 
 INSERT INTO `security_user` (`id`, `password`, `last_login`, `is_superuser`, `registered`, `email`, `is_active`, `is_staff`, `deleted_at`, `created_at`, `updated_at`, `reset_code`, `reset_code_expiration`, `person_id`, `role_id`) VALUES
-	(1, 'pbkdf2_sha256$600000$c27VSLoHl7gXHmV3Ii5pOK$FuYQpuI1rTwjdwCt3X9nYZiftEoIlOpQGkzT6+6cIEE=', NULL, 0, 0, 'daniela_ramos@soy.sena.edu.co', 1, 0, NULL, '2025-11-06 19:31:52.609196', '2025-11-06 19:32:53.972992', NULL, NULL, 1, 2),
+	(1, 'pbkdf2_sha256$600000$c27VSLoHl7gXHmV3Ii5pOK$FuYQpuI1rTwjdwCt3X9nYZiftEoIlOpQGkzT6+6cIEE=', NULL, 0, 0, 'reyving_ramirez@soy.sena.edu.co', 1, 0, NULL, '2025-11-06 19:31:52.609196', '2025-11-06 19:32:53.972992', NULL, NULL, 1, 2),
   (2, 'pbkdf2_sha256$600000$c27VSLoHl7gXHmV3Ii5pOK$FuYQpuI1rTwjdwCt3X9nYZiftEoIlOpQGkzT6+6cIEE=', NULL, 0, 0, 'july@sena.edu.co', 1, 0, NULL, '2025-11-06 19:31:52.609196', '2025-11-06 19:32:53.972992', NULL, NULL, 2, 1),
-  (3, 'pbkdf2_sha256$600000$c27VSLoHl7gXHmV3Ii5pOK$FuYQpuI1rTwjdwCt3X9nYZiftEoIlOpQGkzT6+6cIEE=', NULL, 0, 0, 'ramos@sena.edu.co', 1, 0, NULL, '2025-11-06 19:31:52.609196', '2025-11-06 19:32:53.972992', NULL, NULL, 3, 3),
+  (3, 'pbkdf2_sha256$600000$c27VSLoHl7gXHmV3Ii5pOK$FuYQpuI1rTwjdwCt3X9nYZiftEoIlOpQGkzT6+6cIEE=', NULL, 0, 0, 'brayan.cortes@sena.edu.co', 1, 0, NULL, '2025-11-06 19:31:52.609196', '2025-11-06 19:32:53.972992', NULL, NULL, 3, 3),
   (4, 'pbkdf2_sha256$600000$c27VSLoHl7gXHmV3Ii5pOK$FuYQpuI1rTwjdwCt3X9nYZiftEoIlOpQGkzT6+6cIEE=', NULL, 0, 0, 'paola@sena.edu.co', 1, 0, NULL, '2025-11-06 19:31:52.609196', '2025-11-06 19:32:53.972992', NULL, NULL, 4, 5),
   (5, 'pbkdf2_sha256$600000$c27VSLoHl7gXHmV3Ii5pOK$FuYQpuI1rTwjdwCt3X9nYZiftEoIlOpQGkzT6+6cIEE=', NULL, 0, 0, 'mario@sena.edu.co', 1, 0, NULL, '2025-11-06 19:31:52.609196', '2025-11-06 19:32:53.972992', NULL, NULL, 5, 4);
 

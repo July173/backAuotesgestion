@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
@@ -8,6 +9,7 @@ from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.assign.services.VisitFollowingService import VisitFollowingService
 from apps.assign.entity.serializers.VisitFollowingSerializer import VisitFollowingSerializer
 from apps.assign.entity.serializers.VisitFollowingUpdateSerializer import VisitFollowingUpdateSerializer
+from apps.assign.entity.serializers.VisitFollowingPDFSerializer import VisitFollowingPDFSerializer
 
 
 from apps.assign.entity.models import VisitFollowing
@@ -106,3 +108,63 @@ class VisitFollowingViewset(BaseViewSet):
             return Response({'success': False, 'message': 'Visita no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.serializer_class(visit)
         return Response({'success': True, 'visit': serializer.data}, status=status.HTTP_200_OK)
+
+    #---------------------- Upload PDF Report ---------------------#
+    @swagger_auto_schema(
+        method='post',
+        operation_description="Carga un archivo PDF como reporte de visita de seguimiento.",
+        tags=["VisitFollowing"],
+        manual_parameters=[
+            openapi.Parameter('pdf_file', openapi.IN_FORM, type=openapi.TYPE_FILE, required=True, description="Archivo PDF del reporte de visita"),
+        ],
+        consumes=['multipart/form-data'],
+        responses={
+            200: openapi.Response(
+                description="PDF cargado exitosamente",
+                examples={
+                    "application/json": {
+                        "success": True,
+                        "message": "Archivo PDF del reporte cargado exitosamente",
+                        "data": {
+                            "visit_id": 1,
+                            "pdf_name": "reporte_visita_1.pdf",
+                            "pdf_size": 102400,
+                            "pdf_content_type": "application/pdf",
+                            "pdf_url": "/media/visitReports/reporte_visita_1.pdf",
+                            "visit_number": 1,
+                            "state_visit": "REALIZADA",
+                            "name_visit": "Primera visita"
+                        }
+                    }
+                }
+            ),
+            400: openapi.Response(description="Error de validación o archivo inválido"),
+            404: openapi.Response(description="Visita no encontrada")
+        }
+    )
+    @action(detail=True, methods=['post'], url_path='upload-pdf', parser_classes=[MultiPartParser, FormParser])
+    def upload_pdf(self, request, pk=None):
+        """
+        Carga un archivo PDF como reporte de una visita de seguimiento.
+        El archivo debe ser tipo PDF y no mayor a 10MB.
+        """
+        if not pk:
+            return Response(
+                {'success': False, 'message': 'ID de visita requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer = VisitFollowingPDFSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                {'success': False, 'message': 'Datos inválidos', 'errors': serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        service = self.service_class()
+        result = service.upload_pdf_to_visit(int(pk), serializer.validated_data)
+        
+        if result['success']:
+            return Response(result, status=status.HTTP_200_OK)
+        else:
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
