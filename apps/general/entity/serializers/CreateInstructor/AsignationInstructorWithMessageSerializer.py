@@ -10,7 +10,6 @@ class AsignationInstructorWithMessageSerializer(serializers.ModelSerializer):
     instructor = serializers.PrimaryKeyRelatedField(queryset=Instructor.objects.all())
     request_asignation = serializers.PrimaryKeyRelatedField(queryset=RequestAsignation.objects.all())
     request_state = serializers.ChoiceField(choices=[(choice.value, choice.label) for choice in RequestState], required=False, write_only=True)
-
     # Campos de solo lectura para exponer datos relacionados
     aprendiz_id = serializers.SerializerMethodField(read_only=True)
     nombre = serializers.SerializerMethodField(read_only=True)
@@ -18,12 +17,18 @@ class AsignationInstructorWithMessageSerializer(serializers.ModelSerializer):
     numero_identificacion = serializers.SerializerMethodField(read_only=True)
     fecha_solicitud = serializers.SerializerMethodField(read_only=True)
     estado_solicitud = serializers.SerializerMethodField(read_only=True)
+    state_request = serializers.SerializerMethodField(read_only=True)  # Alias de estado_solicitud
     modalidad = serializers.SerializerMethodField(read_only=True)
+    asignation_instructor_id = serializers.SerializerMethodField(read_only=True)  # <-- añadido
+    numero_ficha = serializers.SerializerMethodField(read_only=True)
+    date_start_production_stage = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = AsignationInstructor
         fields = [
             'id',
+            'asignation_instructor_id',
+            'state_asignation',
             'instructor',
             'request_asignation',
             'request_state',
@@ -31,12 +36,19 @@ class AsignationInstructorWithMessageSerializer(serializers.ModelSerializer):
             'nombre',
             'tipo_identificacion',
             'numero_identificacion',
+            'numero_ficha',
             'fecha_solicitud',
+            'date_start_production_stage',
             'estado_solicitud',
+            'state_request',
             'modalidad',
             'messages',
             'programa'
         ]
+
+    def get_asignation_instructor_id(self, obj):
+        return obj.id
+
     def get_messages(self, obj):
         try:
             messages = obj.request_asignation.messages.all()
@@ -98,8 +110,27 @@ class AsignationInstructorWithMessageSerializer(serializers.ModelSerializer):
         except Exception:
             return None
 
+    def get_state_request(self, obj):
+        # Alias de estado_solicitud
+        try:
+            return obj.request_asignation.request_state
+        except Exception:
+            return None
+
     def get_programa(self, obj):
         try:
             return obj.request_asignation.apprentice.ficha.program.name
+        except Exception:
+            return None
+
+    def get_numero_ficha(self, obj):
+        try:
+            return obj.request_asignation.apprentice.ficha.file_number
+        except Exception:
+            return None
+
+    def get_date_start_production_stage(self, obj):
+        try:
+            return obj.request_asignation.date_start_production_stage
         except Exception:
             return None

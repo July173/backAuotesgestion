@@ -4,7 +4,7 @@ from apps.assign.entity.models import VisitFollowing, AsignationInstructor
 
 class VisitFollowingSerializer(serializers.ModelSerializer):
     asignation_instructor = serializers.PrimaryKeyRelatedField(queryset=AsignationInstructor.objects.all())
-    request_asignation = serializers.SerializerMethodField(read_only=True)
+    state_asignation = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = VisitFollowing
@@ -19,14 +19,10 @@ class VisitFollowingSerializer(serializers.ModelSerializer):
             'observation_state_visit',
             'pdf_report',
             'asignation_instructor',
-            'request_asignation'
+            'state_asignation',
         ]
     
-    def get_request_asignation(self, obj):
-        """
-        Obtiene el ID de la solicitud de asignación a través de la relación con AsignationInstructor.
-        Este campo es de solo lectura y se incluye en las respuestas para referencia.
-        """
-        if obj.asignation_instructor and obj.asignation_instructor.request_asignation:
-            return obj.asignation_instructor.request_asignation.id
+    def get_state_asignation(self, obj):
+        if obj.asignation_instructor and hasattr(obj.asignation_instructor, 'state_asignation'):
+            return obj.asignation_instructor.state_asignation
         return None

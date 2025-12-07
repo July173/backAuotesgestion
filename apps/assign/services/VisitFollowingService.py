@@ -15,20 +15,29 @@ class VisitFollowingService(BaseService):
         """
         Actualiza parcialmente un VisitFollowing excluyendo los campos indicados en exclude_fields.
         Retorna la instancia actualizada o None si no existe.
+        También actualiza el state_asignation tanto en VisitFollowing como en AsignationInstructor.
         """
         if exclude_fields is None:
             exclude_fields = []
         visit = self.repository.get_by_id(visit_id)
         if not visit:
             return None
-        # Build payload excluding protected fields
+        # Build payload excluding protected fields (permitir state_asignation pasar al serializer)
         allowed_payload = {k: v for k, v in (data or {}).items() if k not in exclude_fields}
         # Validate with serializer to ensure proper types/limits
         serializer = VisitFollowingUpdateSerializer(instance=visit, data=allowed_payload, partial=True)
         if not serializer.is_valid():
             # raise value error with serializer errors so caller can return 400
             raise ValueError(serializer.errors)
-        serializer.save()
+        with transaction.atomic():
+            # Guardar cambios en VisitFollowing (incluye state_asignation si viene en data)
+            serializer.save()
+            # TAMBIÉN actualizar state_asignation de AsignationInstructor para mantener sincronizado
+            new_state = data.get('state_asignation')
+            if new_state is not None and hasattr(visit, 'asignation_instructor') and visit.asignation_instructor is not None:
+                visit.asignation_instructor.state_asignation = new_state
+                visit.asignation_instructor.save()
+                logger.info(f"Actualizado state_asignation a '{new_state}' en VisitFollowing y AsignationInstructor")
         return serializer.instance
     
     def upload_pdf_to_visit(self, visit_id, validated_data):
@@ -57,9 +66,9 @@ class VisitFollowingService(BaseService):
             if not visit_id or visit_id <= 0:
                 raise ValueError("ID de visita inválido")
             
-            # Validar tamaño del archivo (máximo 10MB)
-            if pdf_file.size > 10 * 1024 * 1024:  # 10MB
-                raise ValueError("El archivo PDF no puede ser mayor a 10MB")
+            # Validar tamaño del archivo (máximo 5MB)
+            if pdf_file.size > 5 * 1024 * 1024:  # 5MB
+                raise ValueError("El archivo PDF no puede ser mayor a 5MB")
             
             # Validar extensión
             if not pdf_file.name.lower().endswith('.pdf'):

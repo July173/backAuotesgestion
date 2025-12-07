@@ -10,6 +10,7 @@ from apps.assign.services.VisitFollowingService import VisitFollowingService
 from apps.assign.entity.serializers.VisitFollowingSerializer import VisitFollowingSerializer
 from apps.assign.entity.serializers.VisitFollowingUpdateSerializer import VisitFollowingUpdateSerializer
 from apps.assign.entity.serializers.VisitFollowingPDFSerializer import VisitFollowingPDFSerializer
+from apps.assign.entity.serializers.VisitFollowingPDFOnlySerializer import VisitFollowingPDFOnlySerializer
 
 
 from apps.assign.entity.models import VisitFollowing
@@ -111,11 +112,12 @@ class VisitFollowingViewset(BaseViewSet):
 
     #---------------------- Upload PDF Report ---------------------#
     @swagger_auto_schema(
-        method='post',
-        operation_description="Carga un archivo PDF como reporte de visita de seguimiento.",
+        method='patch',
+        operation_description="Actualiza solo el campo pdf_report de una visita de seguimiento.",
         tags=["VisitFollowing"],
+        request_body=VisitFollowingPDFOnlySerializer,
         manual_parameters=[
-            openapi.Parameter('pdf_file', openapi.IN_FORM, type=openapi.TYPE_FILE, required=True, description="Archivo PDF del reporte de visita"),
+            openapi.Parameter('id', openapi.IN_PATH, description="ID de la visita", type=openapi.TYPE_INTEGER, required=True)
         ],
         consumes=['multipart/form-data'],
         responses={
@@ -142,19 +144,15 @@ class VisitFollowingViewset(BaseViewSet):
             404: openapi.Response(description="Visita no encontrada")
         }
     )
-    @action(detail=True, methods=['post'], url_path='upload-pdf', parser_classes=[MultiPartParser, FormParser])
+    @action(detail=True, methods=['patch'], url_path='upload-pdf', parser_classes=[MultiPartParser, FormParser])
     def upload_pdf(self, request, pk=None):
-        """
-        Carga un archivo PDF como reporte de una visita de seguimiento.
-        El archivo debe ser tipo PDF y no mayor a 10MB.
-        """
         if not pk:
             return Response(
                 {'success': False, 'message': 'ID de visita requerido'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        serializer = VisitFollowingPDFSerializer(data=request.data)
+        serializer = VisitFollowingPDFOnlySerializer(data=request.data)
         if not serializer.is_valid():
             return Response(
                 {'success': False, 'message': 'Datos inválidos', 'errors': serializer.errors},
@@ -162,7 +160,7 @@ class VisitFollowingViewset(BaseViewSet):
             )
         
         service = self.service_class()
-        result = service.upload_pdf_to_visit(int(pk), serializer.validated_data)
+        result = service.upload_pdf_to_visit(int(pk), {'pdf_file': serializer.validated_data['pdf_report']})
         
         if result['success']:
             return Response(result, status=status.HTTP_200_OK)

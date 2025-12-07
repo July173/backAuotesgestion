@@ -431,36 +431,32 @@ class ExcelInstructorTemplateService:
                     
                     # Procesar el registro
                     with transaction.atomic():
-                        user_created = self._create_instructor_record(row_data, final_password)
-                        if user_created:
-                            results['successful_registrations'] += 1
-                            
-                            # Enviar correo con credenciales
-                            email_sent = self._send_credentials_email(
-                                row_data['email'],
-                                row_data['primer_nombre'],
-                                row_data['primer_apellido'],
-                                final_password
-                            )
-                            
-                            if email_sent:
-                                results['emails_sent'] += 1
-                            
-                            results['success'].append({
-                                'row': row_num,
-                                'message': f"Instructor {row_data['primer_nombre']} {row_data['primer_apellido']} registrado exitosamente",
-                                'email': row_data['email'],
-                                'email_sent': email_sent,
-                                'password': final_password  # Solo para debugging, remover en producción
-                            })
-                        else:
-                            results['errors'].append({
-                                'row': row_num,
-                                'errors': ['Error al crear el registro del instructor'],
-                                'data': row_data
-                            })
+                        self._create_instructor_record(row_data, final_password)
+                        results['successful_registrations'] += 1
+                    
+                    # Enviar correo con credenciales (fuera de la transacción)
+                    email_sent = self._send_credentials_email(
+                        row_data['email'],
+                        row_data['primer_nombre'],
+                        row_data['primer_apellido'],
+                        final_password
+                    )
+                    
+                    if email_sent:
+                        results['emails_sent'] += 1
+                    
+                    results['success'].append({
+                        'row': row_num,
+                        'message': f"Instructor {row_data['primer_nombre']} {row_data['primer_apellido']} registrado exitosamente",
+                        'email': row_data['email'],
+                        'email_sent': email_sent,
+                        'password': final_password  # Solo para debugging, remover en producción
+                    })
                 
                 except Exception as e:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Error en fila {row_num}: {str(e)}", exc_info=True)
                     results['errors'].append({
                         'row': row_num,
                         'errors': [f"Error procesando fila: {str(e)}"],
@@ -537,53 +533,51 @@ class ExcelInstructorTemplateService:
 
     def _create_instructor_record(self, data, final_password):
         """Crea un registro completo de instructor (Person + User + Instructor)"""
-        try:
-            from apps.general.entity.models.TypeContract import TypeContract
-            
-            # 1. Obtener el ID del tipo de documento desde la BD
-            doc_type = DocumentType.objects.get(acronyms=data['tipo_identificacion'], active=True)
-            
-            # 2. Crear Person usando type_identification_id directamente
-            person = Person.objects.create(
-                first_name=data['primer_nombre'],
-                second_name=data.get('segundo_nombre', ''),
-                first_last_name=data['primer_apellido'],
-                second_last_name=data.get('segundo_apellido', ''),
-                phone_number=data['telefono'],
-                type_identification_id=doc_type.id,  # Usar el ID directamente
-                number_identification=data['numero_identificacion'],
-                active=True
-            )
-            
-            # 3. Crear User (activo automáticamente)
-            hashed_password = make_password(final_password)
-            user = User.objects.create(
-                email=data['email'],
-                password=hashed_password,
-                person=person,
-                is_active=True,  # Activo automáticamente
-                role_id=3,  # Rol de Instructor
-                registered=False  # No registrado
-            )
-            
-            # 4. Obtener área de conocimiento
-            knowledge_area = KnowledgeArea.objects.get(name=data['area_conocimiento'], active=True)
-            
-            # 5. Obtener tipo de contrato desde la BD
-            contract_type = TypeContract.objects.get(name=data['tipo_contrato'], active=True)
-            
-            # 6. Crear Instructor
-            instructor = Instructor.objects.create(
-                person=person,
-                contractType_id=contract_type.id,  # Usar el ID directamente
-                contractStartDate=data['fecha_inicio'],
-                contractEndDate=data['fecha_fin'],
-                knowledgeArea=knowledge_area,
-                active=True
-            )
-            
-            return True
-            
-        except Exception as e:
-            print(f"Error creando instructor: {e}")
-            return False
+        from apps.general.entity.models.TypeContract import TypeContract
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # 1. Obtener el ID del tipo de documento desde la BD
+        doc_type = DocumentType.objects.get(acronyms=data['tipo_identificacion'], active=True)
+        
+        # 2. Crear Person usando type_identification_id directamente
+        person = Person.objects.create(
+            first_name=data['primer_nombre'],
+            second_name=data.get('segundo_nombre', ''),
+            first_last_name=data['primer_apellido'],
+            second_last_name=data.get('segundo_apellido', ''),
+            phone_number=data['telefono'],
+            type_identification_id=doc_type.id,  # Usar el ID directamente
+            number_identification=data['numero_identificacion'],
+            active=True
+        )
+        
+        # 3. Crear User (activo automáticamente)
+        hashed_password = make_password(final_password)
+        user = User.objects.create(
+            email=data['email'],
+            password=hashed_password,
+            person=person,
+            is_active=True,  # Activo automáticamente
+            role_id=3,  # Rol de Instructor
+            registered=False  # No registrado
+        )
+        
+        # 4. Obtener área de conocimiento
+        knowledge_area = KnowledgeArea.objects.get(name=data['area_conocimiento'], active=True)
+        
+        # 5. Obtener tipo de contrato desde la BD
+        contract_type = TypeContract.objects.get(name=data['tipo_contrato'], active=True)
+        
+        # 6. Crear Instructor
+        instructor = Instructor.objects.create(
+            person=person,
+            contract_type=contract_type,  # Pasar el objeto completo
+            contract_start_date=data['fecha_inicio'],
+            contract_end_date=data['fecha_fin'],
+            knowledge_area=knowledge_area,
+            active=True
+        )
+        
+        logger.info(f"Instructor creado exitosamente: {data['email']}")
+        return True

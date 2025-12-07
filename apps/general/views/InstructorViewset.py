@@ -10,6 +10,9 @@ from apps.general.entity.models import Instructor
 from apps.general.entity.serializers.CreateInstructor.CreateInstructorSerializer import CreateInstructorSerializer
 from apps.general.entity.serializers.CreateInstructor.GetInstructorSerializer import GetInstructorSerializer
 from apps.general.entity.serializers.CreateInstructor.AsignationInstructorWithMessageSerializer import AsignationInstructorWithMessageSerializer
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class InstructorViewset(BaseViewSet):
@@ -349,3 +352,144 @@ class InstructorViewset(BaseViewSet):
             )
         serializer = AsignationInstructorWithMessageSerializer(asignaciones, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        method='get',
+        operation_description="Obtiene el dashboard del instructor con estadísticas y visitas próximas",
+        tags=["Instructor"],
+        responses={
+            200: openapi.Response(
+                "OK",
+                examples={
+                    "application/json": {
+                        "success": True,
+                        "data": {
+                            "stats": {
+                                "visitas_programadas": 2,
+                                "aprendices_asignados": 5,
+                                "aprendices_evaluados": 3
+                            },
+                            "proximas_visitas": [
+                                {
+                                    "id": 1,
+                                    "aprendiz_nombre": "Carlos Ruiz",
+                                    "aprendiz_identificacion": "1032679504",
+                                    "programa": "Análisis y Desarrollo de Software",
+                                    "tipo_visita": "Concertación",
+                                    "fecha_programada": "2025-12-10",
+                                    "asignacion_id": 1,
+                                    "visita_id": 1
+                                }
+                            ]
+                        }
+                    }
+                }
+            )
+        }
+    )
+    @action(detail=True, methods=['get'], url_path='dashboard')
+    def instructor_dashboard(self, request, pk=None):
+        """
+        Dashboard del instructor con estadísticas y visitas próximas
+        """
+        from apps.assign.entity.models import AsignationInstructor, VisitFollowing
+        from django.db.models import Count, Q
+        from datetime import datetime, timedelta
+        
+        try:
+            instructor_id = pk
+            
+            # Obtener todas las asignaciones activas del instructor
+            asignaciones = AsignationInstructor.objects.filter(
+                instructor_id=instructor_id,
+                active=True
+            )
+            
+            # Estadísticas
+            total_asignados = asignaciones.count()
+            
+            # Aprendices evaluados (con mensaje de instructor)
+            asignados_evaluados = 0
+            for asig in asignaciones:
+                messages = asig.request_asignation.messages.filter(whose_message='INSTRUCTOR')
+                if messages.exists():
+                    asignados_evaluados += 1
+            
+            # Obtener visitas próximas (próximos 7 días)
+            hoy = datetime.now().date()
+            proximo_limite = hoy + timedelta(days=7)
+            
+            # Obtener todas las visitas de las asignaciones del instructor
+            visitas = VisitFollowing.objects.filter(
+                asignation_instructor__in=asignaciones,
+                state_visit='por hacer',
+                scheduled_date__lte=proximo_limite
+            ).select_related(
+                'asignation_instructor',
+                'asignation_instructor__request_asignation',
+                'asignation_instructor__request_asignation__apprentice',
+                'asignation_instructor__request_asignation__apprentice__person',
+                'asignation_instructor__request_asignation__apprentice__ficha',
+                'asignation_instructor__request_asignation__apprentice__ficha__program'
+            ).order_by('scheduled_date')
+            
+            total_visitas_programadas = visitas.count()
+            
+            # Construir lista de próximas visitas
+            proximas_visitas = []
+            for visita in visitas[:10]:  # Limitar a 10 visitas
+                try:
+                    req_asig = visita.asignation_instructor.request_asignation
+                    apprentice = req_asig.apprentice
+                    person = apprentice.person
+                    programa = apprentice.ficha.program.name if apprentice.ficha and apprentice.ficha.program else 'N/A'
+                    
+                    # Calcular días hasta la visita
+                    dias_hasta = (visita.scheduled_date - hoy).days
+                    if dias_hasta == 0:
+                        fecha_texto = 'Hoy'
+                    elif dias_hasta == 1:
+                        fecha_texto = 'Mañana'
+                    elif dias_hasta == -1:
+                        fecha_texto = 'Ayer'
+                    elif dias_hasta < 0:
+                        fecha_texto = f'Hace {abs(dias_hasta)} días'
+                    else:
+                        fecha_texto = f'En {dias_hasta} días'
+                    
+                    proximas_visitas.append({
+                        'id': visita.id,
+                        'aprendiz_nombre': f"{person.first_name} {person.first_last_name}",
+                        'aprendiz_identificacion': person.number_identification,
+                        'programa': programa,
+                        'tipo_visita': visita.name_visit,
+                        'fecha_programada': visita.scheduled_date.strftime('%Y-%m-%d'),
+                        'fecha_texto': fecha_texto,
+                        'asignacion_id': visita.asignation_instructor.id,
+                        'visita_id': visita.id,
+                        'numero_ficha': apprentice.ficha.numero_ficha if apprentice.ficha else None
+                    })
+                except Exception as e:
+                    logger.error(f"Error procesando visita {visita.id}: {e}")
+                    continue
+            
+            response_data = {
+                'success': True,
+                'data': {
+                    'stats': {
+                        'visitas_programadas': total_visitas_programadas,
+                        'aprendices_asignados': total_asignados,
+                        'aprendices_evaluados': asignados_evaluados
+                    },
+                    'proximas_visitas': proximas_visitas
+                }
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error en instructor_dashboard: {e}")
+            return Response({
+                'success': False,
+                'message': f'Error al obtener dashboard: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
